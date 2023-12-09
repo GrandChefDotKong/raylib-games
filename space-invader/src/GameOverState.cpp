@@ -22,8 +22,8 @@ public:
     return States::CONTINUE;
   }
   virtual void Draw() {
-    DrawText("Game Over ...", (SCREEN_WIDTH/2) - (m_textSize/4), SCREEN_HEIGHT/2, 50, Dark_Green);
-    DrawText("Press Enter to restrart or Escape to quite.", OFFSET-5, OFFSET+SCREEN_WIDTH+10, 20, Dark_Green);
+    DrawText("Game Over ...", (SCREEN_WIDTH/2)-(m_textSize/2)+OFFSET, SCREEN_HEIGHT/2, 50, Light_Green);
+    DrawText("Press Enter to restrart or Escape to quite.", OFFSET+10, SCREEN_HEIGHT+OFFSET+10, 15, Light_Green);
   }
 
   virtual ~GameOverState(){}

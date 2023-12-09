@@ -10,7 +10,7 @@ class Laser {
   Color m_color;
 
  public: 
-  Laser(Vector2 position, Direction direction, int speed = 3, int width = 2, int height = 15, Color color = WHITE): 
+  Laser(Vector2 position, Direction direction, int speed = 3, int width = 3, int height = 15, Color color = WHITE): 
   m_position(position) ,m_direction(direction), m_speed(speed), m_width(width), m_height(height), m_color(color) {
   }
 
@@ -28,7 +28,15 @@ class Laser {
   }
 
   const Vector2 getPosition() {
-    return m_position;
+    if(m_direction == UP){
+      return m_position;
+    }
+
+    return Vector2{m_position.x, m_position.y + m_height};
+  }
+
+  const Direction getDirection() {
+    return m_direction;
   }
 
   void Draw() {
