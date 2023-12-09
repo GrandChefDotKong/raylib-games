@@ -4,21 +4,24 @@ class Alien {
 
 private:
   Texture2D* m_texture;
-  Vector2 m_position;
+  Rectangle m_rectangle;
   Direction m_direction = RIGHT;
+
   int m_offset;
   float m_scale = 1;
-  int m_speedX;
-  int m_speedY;
-  int m_width = 55;
-  int m_height = 55;
+
+  Vector2 m_speed;
 
   bool m_isFiring = false;
   bool m_isAlive = true;
 
 public:
-  Alien(Texture2D* texture, Vector2 position, int offset, int speedX, int speedY):
-  m_texture(texture), m_position(position), m_speedX(speedX), m_speedY(speedY), m_offset(offset)  {
+  Alien(Texture2D* texture, Vector2 position, Vector2 speed, int offset):
+  m_texture(texture), m_speed(speed), m_offset(offset)  {
+    m_rectangle.x = position.x;
+    m_rectangle.y = position.y;
+    m_rectangle.width = m_texture->width;
+    m_rectangle.height = m_texture->height;
       
   }
 
@@ -27,20 +30,22 @@ public:
       case IDDLE:
         break;
       case LEFT:
-        m_position.x -= m_speedX;
+        m_rectangle.x -= m_speed.x;
       break;
       case RIGHT:
-        m_position.x += m_speedX;
+        m_rectangle.x += m_speed.x;
       break;
       case DOWN:
-        m_position.y += m_speedY;
+        m_rectangle.y += m_speed.y;
       break;
     }
   }
 
-  bool CheckCollision(Vector2 laserPosition) {
-    if(laserPosition.x + 3 >= m_position.x && laserPosition.x < m_position.x + m_width &&
-      laserPosition.y <= m_position.y + m_height && laserPosition.y > m_position.y
+  bool CheckCollision(Rectangle laser) {
+    if(laser.x + laser.width >= m_rectangle.x && 
+      laser.x < m_rectangle.x + m_rectangle.width &&
+      laser.y <= m_rectangle.y + m_rectangle.height && 
+      laser.y > m_rectangle.y
     ) {
       m_isAlive = false;
       return true;
@@ -49,18 +54,22 @@ public:
     return false;
   }
 
-  const Vector2 getPosition() {
-    return m_position;
+  const Rectangle getPosition() {
+    return m_rectangle;
   }
 
-  void changeDirection(Direction direction) {
+  const Direction getDirection() {
+    return m_direction;
+  }
+
+  void ChangeDirection(Direction direction) {
     m_direction = direction;
   }
 
   void Draw() {
     DrawTextureEx(
       *m_texture,
-      Vector2{m_position.x + m_offset, m_position.y + m_offset},
+      Vector2{m_rectangle.x + m_offset, m_rectangle.y + m_offset},
       0,
       m_scale,
       WHITE
@@ -77,54 +86,56 @@ private:
   std::vector<Alien*> m_aliens;
   std::vector<Texture2D> m_textures;
   std::vector<Image> m_images;
-
-  Vector2 m_position;
   Direction m_direction = RIGHT;
 
-  int m_cellSize = 55;
-  int m_offset = 30;
-  int m_speedX = 1;
-  int m_speedY = 2;
+  Vector2 m_speed;
+
+  int m_cellSize = ALIENS_CELL_SIZE;
+  int m_offset = OFFSET;
 
 public:
-  Aliens(Vector2 position): m_position(position) {
+  Aliens(Vector2 position) {
     m_images.push_back(LoadImage("ressources/alien_1.png"));
     m_images.push_back(LoadImage("ressources/alien_2.png"));
     m_images.push_back(LoadImage("ressources/alien_3.png"));
 
+    m_speed.x = 2;
+    m_speed.y = 12;
 
     for(auto image : m_images) {
       m_textures.push_back(LoadTextureFromImage(image));
     }
 
-    this->Initiate();
+    this->Initiate(position);
   }
 
-  void Initiate() {
+  void Initiate(Vector2 position) {
     for(int i(0); i < m_cellSize; ++i) {
 
       Vector2 alienPosition;
-      alienPosition.x = m_position.x + (i%11) * m_cellSize;
-      alienPosition.y = m_position.y + (i/11) * m_cellSize;
+      alienPosition.x = position.x + (i%ALIENS_COLUMNS) * m_cellSize;
+      alienPosition.y = position.y + (i/ALIENS_COLUMNS) * m_cellSize;
 
       int index;
 
-      i < 11 ? index = 2 : i < 33 ? index = 1 : index = 0;
+      i < ALIENS_COLUMNS ? index = 2 : i < ALIENS_COLUMNS*3 ? index = 1 : index = 0;
 
       m_aliens.push_back(
-        new Alien(&m_textures[index], alienPosition, m_offset, m_speedX, m_speedY)
+        new Alien(&m_textures[index], alienPosition, m_speed, m_offset)
       );   
     }
   }
 
   const Vector2 Firing() {
     int alienIndex =  GetRandomValue(0, m_cellSize-1);
-    return m_aliens[alienIndex]->getPosition();
+    return Vector2{
+      m_aliens[alienIndex]->getPosition().x, m_aliens[alienIndex]->getPosition().y
+    };
   }
 
-  bool CheckCollision(const Vector2 laserPosition) {
+  bool CheckCollision(const Rectangle laser) {
     for (int i = m_aliens.size()-1; i >= 0; --i) {
-      if(m_aliens[i]->CheckCollision(laserPosition)) {
+      if(m_aliens[i]->CheckCollision(laser)) {
         delete m_aliens[i];
         m_aliens.erase(m_aliens.begin() + i);
         return true;
@@ -134,32 +145,36 @@ public:
     return false;
   }
 
-  void FixedUpdate() {    
-
-    if(m_direction == DOWN) {
-      m_position.x <= 0 ? m_direction = RIGHT : m_direction = LEFT;
-    } else if(m_position.x + 600 > SCREEN_WIDTH || m_position.x <= 0) {
-      m_direction = DOWN;
-    }
-
-    switch (m_direction) {
-      case IDDLE:
-        break;
-      case LEFT:
-        m_position.x -= m_speedX;
-      break;
-      case RIGHT:
-        m_position.x += m_speedX;
-      break;
-      case DOWN:
-        m_position.y += m_speedY;
-      break;
-    }
-
+  void FixedUpdate() {
+    
     for(auto alien : m_aliens) {
-      alien->changeDirection(m_direction);
       alien->FixedUpdate();
     }
+
+    if(m_aliens[0]->getDirection() == DOWN) {
+      if(m_aliens[0]->getPosition().x <= OFFSET) {
+        for(auto alien : m_aliens) {
+          alien->ChangeDirection(RIGHT);
+        }
+        return;
+      }
+
+      for(auto alien : m_aliens) {
+        alien->ChangeDirection(LEFT);
+      } 
+      return;
+    }
+
+    if(m_aliens[0]->getPosition().x <= 0 ||
+      m_aliens[ALIENS_COLUMNS-1]->getPosition().x + 
+      m_aliens[ALIENS_COLUMNS-1]->getPosition().width >= SCREEN_WIDTH
+    ) {
+      for(auto alien : m_aliens) {
+        alien->ChangeDirection(DOWN);
+      } 
+    }
+
+    
   }
 
   void Draw() {

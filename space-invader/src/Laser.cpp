@@ -1,38 +1,44 @@
 #include "Obstacle.cpp"
 
 class Laser {
- private:
-  Vector2 m_position;
-  int m_width;
-  int m_height;
-  int m_speed;
+
+private:
+  int m_speed = LASER_SPEED;
+  Rectangle m_rectangle;
   Direction m_direction;
   Color m_color;
 
- public: 
-  Laser(Vector2 position, Direction direction, int speed = 3, int width = 3, int height = 15, Color color = WHITE): 
-  m_position(position) ,m_direction(direction), m_speed(speed), m_width(width), m_height(height), m_color(color) {
+public: 
+  Laser(Vector2 position, Direction direction, Color color = WHITE): 
+  m_direction(direction), m_color(color) {
+
+    m_rectangle = Rectangle{position.x, position.y, LASER_WIDTH, LASER_HEIGHT};
   }
 
   void FixedUpdate() {
     switch (m_direction) {
     case UP:
-      m_position.y -= m_speed;
+      m_rectangle.y -= m_speed;
       break;    
     case DOWN:
-      m_position.y += m_speed;
+      m_rectangle.y += m_speed;
       break;
     default:
       break;
     }
   }
 
-  const Vector2 getPosition() {
-    if(m_direction == UP){
-      return m_position;
+  const Rectangle getPosition() {
+    if(m_direction == UP) {
+      return m_rectangle;
     }
 
-    return Vector2{m_position.x, m_position.y + m_height};
+    return Rectangle{
+      m_rectangle.x, 
+      m_rectangle.y+m_rectangle.height, 
+      m_rectangle.width, 
+      -m_rectangle.height
+    };
   }
 
   const Direction getDirection() {
@@ -41,7 +47,7 @@ class Laser {
 
   void Draw() {
     DrawRectangleRounded(
-      Rectangle{m_position.x, m_position.y, (float)m_width, (float)m_height},
+      m_rectangle,
       0.5, 
       6,
       BLUE
@@ -49,6 +55,5 @@ class Laser {
   }
 
   ~Laser() {
-
   }
 };

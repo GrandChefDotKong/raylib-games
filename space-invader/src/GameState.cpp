@@ -4,38 +4,44 @@ class GameState: public State {
 
 private:
   unsigned int m_score;
+  bool m_gameOver;
+  
   Timer* m_speed;
   Timer* m_firingSpeed;
-  bool m_gameOver;
 
   Spaceship* m_spaceship;
+  Aliens* m_aliens;
   std::vector<Laser*> m_lasers;
   std::vector<Obstacle*> m_obstacles;
-  Aliens* m_aliens;
-
+  
 public:
   GameState(): m_score(0), m_gameOver(false) {
     m_spaceship = new Spaceship("ressources/spaceship.png");
+
     m_speed = new Timer(0.02);
     m_firingSpeed = new Timer(0.1);
-    m_obstacles.push_back(new Obstacle(299, obstacle_grid, Vector2{200, 620}, RED));
-    m_obstacles.push_back(new Obstacle(299, obstacle_grid, Vector2{350, 620}, RED));
-    m_obstacles.push_back(new Obstacle(299, obstacle_grid, Vector2{500, 620}, RED));
-    m_aliens = new Aliens(Vector2{50+OFFSET, 30+OFFSET});
+
+    for(int i(1); i <= NUMBER_OBSTACLE; ++i) {
+      m_obstacles.push_back(
+        new Obstacle(
+          ROWS*COLUMNS, obstacle_grid, Vector2{(float)i*100+50, 620}, CELL_SIZE, ROWS, COLUMNS, RED
+        )
+      );
+    }
+
+    m_aliens = new Aliens(Vector2{50+OFFSET, 10+OFFSET});
   }
 
   virtual States Update() {
     if(m_gameOver) {
       return States::GAMEOVER;
     }
-
+// Spaceship update & fire
     m_spaceship->Update();
-
     if(m_spaceship->isFiring()) {
-
       Vector2 laserPosition = Vector2{
         m_spaceship->getPosition().x + (m_spaceship->getDimension().x/2) - 1,
-        m_spaceship->getPosition().y - 15
+        m_spaceship->getPosition().y - LASER_HEIGHT
       };
 
       m_lasers.push_back(
@@ -44,7 +50,7 @@ public:
 
       m_spaceship->stopFiring();
     }
-
+// Generate laser from random alien
     if(m_firingSpeed->eventTriggered()) {
       Vector2 alienPosition =  m_aliens->Firing();
       Vector2 laserPosition = Vector2{
@@ -56,9 +62,8 @@ public:
         new Laser(laserPosition, Direction::DOWN)
       );
     }
-
+// Fixed update
     if(m_speed->eventTriggered()) {
-
       m_spaceship->FixedUpdate();
       m_aliens->FixedUpdate();
 
@@ -98,7 +103,7 @@ public:
           }
         }
       }
-    }
+    } // fixed update end
 
     return States::CONTINUE;
   }

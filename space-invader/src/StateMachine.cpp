@@ -49,18 +49,17 @@ class StateMachine {
     void Draw() {
       BeginDrawing();
       ClearBackground(Dark_Green);
+      
       DrawRectangleLinesEx(
         Rectangle{OFFSET-5, OFFSET-5, SCREEN_WIDTH+10, SCREEN_HEIGHT+10}, 2, Light_Green
       );
 
       m_currentState->Draw();
-
       EndDrawing();
     }
 
     virtual ~StateMachine() {
       delete m_currentState;
-      std::cout << "current state deleted : OK" << std::endl;
       CloseWindow();
     }
 };
