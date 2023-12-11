@@ -1,4 +1,4 @@
-#include "StateMachine.cpp"
+#include "./includes/StateMachine.hpp"
 
 int main () {
 

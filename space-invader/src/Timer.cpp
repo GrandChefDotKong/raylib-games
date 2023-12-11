@@ -1,33 +1,27 @@
-#include "params.cpp"
+#include "./includes/Timer.hpp"
 
-class Timer {
-  private:
-    double m_elapsedTime;
-    double m_interval;
+Timer::Timer(double interval): m_interval(interval), m_elapsedTime(0) {}
 
-  public:
-    Timer(double interval): m_interval(interval), m_elapsedTime(0) {}
+void Timer::Start() {
+  m_elapsedTime = 0;
+}
 
-    void Start() {
-      m_elapsedTime = 0;
-    }
+void Timer::setInterval(double interval) {
+  m_interval = interval;
+}
 
-    void setInterval(double interval) {
-      m_interval = interval;
-    }
+double Timer::getInterval() {
+  return m_interval;
+}
 
-    double getInterval() {
-      return m_interval;
-    }
+bool Timer::eventTriggered() {
+  double currentTime = GetTime();
+  
+  if(currentTime - m_elapsedTime >= m_interval) { 
+    m_elapsedTime = currentTime; 
+    return true;
+  }
 
-    bool eventTriggered() {
-      double currentTime = GetTime();
-      
-      if(currentTime - m_elapsedTime >= m_interval) { 
-        m_elapsedTime = currentTime; 
-        return true;
-      }
+  return false;
+}
 
-      return false;
-    }
-};

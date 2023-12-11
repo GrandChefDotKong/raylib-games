@@ -1,4 +1,5 @@
-#include "Spaceship.cpp"
+#pragma once
+#include "params.hpp"
 
 class State {
 

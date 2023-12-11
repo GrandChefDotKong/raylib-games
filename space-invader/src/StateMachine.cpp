@@ -1,18 +1,12 @@
-#include "GameOverState.cpp"
+#include "./includes/StateMachine.hpp"
 
-class StateMachine {
-  private:
-    State* m_currentState;
-    States m_newState;
-
-  public:
-    StateMachine() {
+    StateMachine::StateMachine() {
       InitWindow(2*OFFSET+SCREEN_WIDTH , 2*OFFSET+SCREEN_HEIGHT, 
       "Space Invader++");
       SetTargetFPS(60);
     }
 
-    void Run() {
+    void StateMachine::Run() {
       m_newState = States::CONTINUE;
       m_currentState = new MenuState();
 
@@ -42,11 +36,11 @@ class StateMachine {
       }
     }
 
-    void Update() {
+    void StateMachine::Update() {
       m_newState = m_currentState->Update();
     }
 
-    void Draw() {
+    void StateMachine::Draw() {
       BeginDrawing();
       ClearBackground(Dark_Green);
       
@@ -58,8 +52,8 @@ class StateMachine {
       EndDrawing();
     }
 
-    virtual ~StateMachine() {
+    StateMachine::~StateMachine() {
       delete m_currentState;
       CloseWindow();
     }
-};
+

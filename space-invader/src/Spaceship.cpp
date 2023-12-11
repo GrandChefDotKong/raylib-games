@@ -1,31 +1,21 @@
-#include "Laser.cpp"
+#include "./includes/Spaceship.hpp"
 
-class Spaceship {
 
-private:
-  
-  Texture2D m_texture;
-  Image m_image;
-  Vector2 m_position;
-  Direction m_direction;
-  int m_offset;
-  float m_scale;
-  int m_speed;
-
-  bool m_isFiring;
-  bool m_isAlive;
-
-public:
-  Spaceship(std::string path, int speed = 2): 
+  Spaceship::Spaceship(std::string path, int speed): 
   m_speed(speed), m_isFiring(false), m_isAlive(true) {
 
-    this->m_image = LoadImage(path.c_str());
-    this->m_texture = LoadTextureFromImage(this->m_image);
+    m_image = LoadImage(path.c_str());
+    m_texture = LoadTextureFromImage(this->m_image);
 
-    m_position = Vector2{SCREEN_WIDTH/2, SCREEN_HEIGHT};
+    m_rectangle = Rectangle{
+      SCREEN_WIDTH/2-(float)m_texture.width/2, 
+      SCREEN_HEIGHT, 
+      (float)m_texture.width, 
+      (float)m_texture.height
+    };
   }
   
-  void Update() {
+  void Spaceship::Update() {
 
     if(IsKeyUp(KEY_SPACE)) {
       m_isFiring = false;
@@ -36,11 +26,11 @@ public:
     }
 
     if(IsKeyDown(KEY_LEFT)) {
-      this->m_direction = LEFT;
+      m_direction = LEFT;
     }
 
     if(IsKeyDown(KEY_RIGHT)) {
-      this->m_direction = RIGHT;
+      m_direction = RIGHT;
     }
 
     if(IsKeyPressed(KEY_SPACE)) {
@@ -48,50 +38,48 @@ public:
     }
   }
 
-  void FixedUpdate() {
+  void Spaceship::FixedUpdate() {
     switch (m_direction) {
       case IDDLE:
         break;
       case LEFT:
-        m_position.x -= m_speed;
+        m_rectangle.x <= OFFSET ? 
+          m_rectangle.x = OFFSET : m_rectangle.x -= m_speed;
       break;
       case RIGHT:
-        m_position.x += m_speed;
+        m_rectangle.x >= SCREEN_WIDTH + OFFSET ? 
+          m_rectangle.x = SCREEN_WIDTH + OFFSET : m_rectangle.x += m_speed;
       break;
     }
   }
 
-  bool isFiring() {
+  const bool Spaceship::isFiring() {
     return m_isFiring;
   }
 
-  void stopFiring() {
+  void Spaceship::stopFiring() {
     m_isFiring = false;
   }
   
-  Vector2 getPosition() {
-    return m_position;
+  const Rectangle Spaceship::getPosition() {
+    return m_rectangle;
   }
 
-  Vector2 getDimension() {
-    return Vector2{(float)m_texture.width, (float)m_texture.height};
+  Spaceship::~Spaceship() {
+    UnloadImage(m_image);
+    UnloadTexture(m_texture);
   }
 
-  ~Spaceship() {
-    UnloadImage(this->m_image);
-    UnloadTexture(this->m_texture);
-  }
-
-  void Draw() {
+  void Spaceship::Draw() {
     DrawTextureEx(
-      this->m_texture,
-      Vector2{ this->m_position.x + m_offset, this->m_position.y + m_offset},
+      m_texture,
+      Vector2{m_rectangle.x, m_rectangle.y},
       0,
       1,
       WHITE
     );
   }
-};
+
 
 
 

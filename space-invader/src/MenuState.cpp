@@ -1,15 +1,10 @@
-#include "State.cpp"
+#include "./includes/MenuState.hpp"
 
-class MenuState: public State {
-private:
-  int m_textSize;
-
-public:
-  MenuState(){
+  MenuState::MenuState(){
     m_textSize = MeasureText("Press Enter ...", 25);
   }
 
-  virtual States Update() {
+  States MenuState::Update() {
     if(IsKeyPressed(KEY_ENTER)) {
       return States::GAME;
     }
@@ -21,7 +16,7 @@ public:
     return States::CONTINUE;
   }
 
-  virtual void Draw() {
+  void MenuState::Draw() {
     DrawText("Press Enter ...", 
       (SCREEN_WIDTH/2) - (m_textSize/4), 
       SCREEN_HEIGHT/2, 
@@ -30,5 +25,6 @@ public:
     );
   }
 
-  virtual ~MenuState(){}
-};
+  MenuState::~MenuState(){}
+
+
