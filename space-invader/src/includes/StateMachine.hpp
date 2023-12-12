@@ -2,6 +2,7 @@
 #include "GameOverState.hpp"
 #include "MenuState.hpp"
 #include "GameState.hpp"
+#include "Animation.hpp"
 
 class StateMachine {
   private:

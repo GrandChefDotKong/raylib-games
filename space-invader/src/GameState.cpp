@@ -2,7 +2,10 @@
 
 
 GameState::GameState(): m_score(0), m_gameOver(false) {
-  m_spaceship = new Spaceship("ressources/spaceship.png");
+  m_spaceship = new Spaceship("ressources/ship.png");
+  Image image = LoadImage("ressources/explosion.png");
+  m_explosionTexture = LoadTextureFromImage(image);
+  UnloadImage(image);
 
   m_speed = new Timer(0.02);
   m_firingSpeed = new Timer(0.1);
@@ -42,6 +45,12 @@ States GameState::Update() {
 
     m_spaceship->stopFiring();
   }
+// Aliens update
+  m_aliens->Update();
+// Explosions update
+  for(auto explosion : m_explosions) {
+    explosion->Update();
+  }
 // Generate laser from random alien
   if(m_firingSpeed->eventTriggered()) {
     Vector2 alienPosition =  m_aliens->Firing();
@@ -74,6 +83,14 @@ States GameState::Update() {
       if(m_lasers[i]->getDirection() == UP && 
         m_aliens->CheckCollision(m_lasers[i]->getPosition())
       ) {
+
+        m_explosions.push_back(
+          new Explosion(
+            &m_explosionTexture, 
+            Vector2{m_lasers[i]->getPosition().x, m_lasers[i]->getPosition().y}
+          )
+        );
+
         delete m_lasers[i];
         m_lasers.erase(m_lasers.begin() + i);
         continue;
@@ -98,7 +115,12 @@ States GameState::Update() {
 }
 
 void GameState::Draw() {
+  for(auto explosion : m_explosions) {
+    explosion->Draw();
+  }
+
   m_spaceship->Draw();
+
   for(auto obstacle : m_obstacles) {
     obstacle->Draw();
   }
@@ -110,9 +132,14 @@ void GameState::Draw() {
 }
 
 GameState::~GameState(){
+  UnloadTexture(m_explosionTexture);
   delete m_spaceship;
   delete m_speed;
   delete m_aliens;
+
+  for(auto explosion : m_explosions) {
+    delete explosion;
+  }
 
   for(auto obstacle : m_obstacles) {
     delete obstacle;
@@ -121,8 +148,6 @@ GameState::~GameState(){
   for (auto laser : m_lasers) {
     delete laser;
   } 
-
-  m_lasers.clear();
 }
 
 

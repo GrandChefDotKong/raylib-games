@@ -1,15 +1,14 @@
 #pragma once
-#include "params.hpp"
+#include "AnimationTree.hpp"
 
 class Spaceship {
 
 private:
   
+  AnimationTree* m_animationTree;
   Texture2D m_texture;
-  Image m_image;
   Rectangle m_rectangle;
   Direction m_direction;
-  float m_scale;
   int m_speed;
 
   bool m_isFiring;
@@ -24,7 +23,6 @@ public:
   const Rectangle getPosition();
   ~Spaceship();
   void Draw();
-
 };
 
 

@@ -17,6 +17,7 @@ public:
   void Initiate(Vector2 position);
   const Vector2 Firing();
   bool CheckCollision(const Rectangle laser);
+  void Update();
   void FixedUpdate();
   void Draw();
   ~Aliens();

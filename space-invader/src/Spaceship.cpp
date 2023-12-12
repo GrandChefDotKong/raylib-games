@@ -4,14 +4,38 @@
   Spaceship::Spaceship(std::string path, int speed): 
   m_speed(speed), m_isFiring(false), m_isAlive(true) {
 
-    m_image = LoadImage(path.c_str());
-    m_texture = LoadTextureFromImage(this->m_image);
+    Image image = LoadImage(path.c_str());
+    m_texture = LoadTextureFromImage(image);
+
+    UnloadImage(image);
+    
+    m_animationTree = new AnimationTree();
+
+    Animation iddle = Animation(m_texture);
+    iddle.AddFrame(Rectangle{16, 0, 16, 16});
+    iddle.setInterval(0.2);
+    iddle.setIsLoop(true);
+
+    Animation left = Animation(m_texture);
+    left.AddFrame(Rectangle{0, 0, 16, 16});
+    left.setInterval(0.2);
+    left.setIsLoop(true);
+    
+    Animation right = Animation(m_texture);
+    right.AddFrame(Rectangle{32, 0, 16, 16});
+    right.setInterval(0.2);
+    right.setIsLoop(true);
+
+    m_animationTree->AddAnimation("iddle", iddle);
+    m_animationTree->AddAnimation("left", left);
+    m_animationTree->AddAnimation("right", right);
+    m_animationTree->setCurrentAnimation("iddle");
 
     m_rectangle = Rectangle{
       SCREEN_WIDTH/2-(float)m_texture.width/2, 
-      SCREEN_HEIGHT, 
-      (float)m_texture.width, 
-      (float)m_texture.height
+      SCREEN_HEIGHT - 24, 
+      48, 
+      48    
     };
   }
   
@@ -23,19 +47,24 @@
 
     if(IsKeyUp(KEY_LEFT) && IsKeyUp(KEY_RIGHT)) {
       m_direction = IDDLE;
+      m_animationTree->setCurrentAnimation("iddle");
     }
 
     if(IsKeyDown(KEY_LEFT)) {
       m_direction = LEFT;
+      m_animationTree->setCurrentAnimation("left");
     }
 
     if(IsKeyDown(KEY_RIGHT)) {
       m_direction = RIGHT;
+      m_animationTree->setCurrentAnimation("right");
     }
 
     if(IsKeyPressed(KEY_SPACE)) {
       m_isFiring = true;
     }
+
+    m_animationTree->Update();
   }
 
   void Spaceship::FixedUpdate() {
@@ -63,22 +92,18 @@
   
   const Rectangle Spaceship::getPosition() {
     return m_rectangle;
+  } 
+  
+  void Spaceship::Draw() {
+    m_animationTree->Draw(m_rectangle);
   }
 
   Spaceship::~Spaceship() {
-    UnloadImage(m_image);
+    delete m_animationTree;
     UnloadTexture(m_texture);
   }
 
-  void Spaceship::Draw() {
-    DrawTextureEx(
-      m_texture,
-      Vector2{m_rectangle.x, m_rectangle.y},
-      0,
-      1,
-      WHITE
-    );
-  }
+ 
 
 
 

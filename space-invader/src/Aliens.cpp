@@ -1,9 +1,9 @@
 #include "./includes/Aliens.hpp"
 
 Aliens::Aliens(Vector2 position) {
-  m_images.push_back(LoadImage("ressources/alien_1.png"));
-  m_images.push_back(LoadImage("ressources/alien_2.png"));
-  m_images.push_back(LoadImage("ressources/alien_3.png"));
+  m_images.push_back(LoadImage("ressources/yellow_enemy.png"));
+  m_images.push_back(LoadImage("ressources/green_enemy.png"));
+  m_images.push_back(LoadImage("ressources/pink_enemy.png"));
 
   m_speed.x = 2;
   m_speed.y = 12;
@@ -49,6 +49,12 @@ bool Aliens::CheckCollision(const Rectangle laser) {
   }
 
   return false;
+}
+
+void Aliens::Update() {
+  for(auto alien : m_aliens) {
+    alien->Update();
+  }
 }
 
 void Aliens::FixedUpdate() {

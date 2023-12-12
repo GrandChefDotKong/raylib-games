@@ -6,7 +6,7 @@
 #include "Aliens.hpp"
 #include "Spaceship.hpp"
 #include "Timer.hpp"
-#include "params.hpp"
+#include "Explosion.hpp"
 
 class GameState: public State {
 
@@ -17,10 +17,13 @@ private:
   Timer* m_speed;
   Timer* m_firingSpeed;
 
+  Texture2D m_explosionTexture;
+
   Spaceship* m_spaceship;
   Aliens* m_aliens;
   std::vector<Laser*> m_lasers;
   std::vector<Obstacle*> m_obstacles;
+  std::vector<Explosion*> m_explosions;
   
 public:
 

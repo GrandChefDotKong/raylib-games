@@ -1,6 +1,8 @@
 #include "./includes/Timer.hpp"
 
-Timer::Timer(double interval): m_interval(interval), m_elapsedTime(0) {}
+Timer::Timer() {}
+
+Timer::Timer(double interval): m_interval(interval) {}
 
 void Timer::Start() {
   m_elapsedTime = 0;
