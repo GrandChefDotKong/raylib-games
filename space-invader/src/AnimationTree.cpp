@@ -6,8 +6,12 @@ void AnimationTree::AddAnimation(std::string animationName, Animation animation)
   m_animations.insert({ animationName, animation });
 }
 
-const std::string AnimationTree::getCurrentAnimation() {
+const std::string AnimationTree::getCurrentAnimationName() {
   return m_currentAnimation;
+}
+
+const Animation AnimationTree::getCurrentAnimation() {
+  return m_animations[m_currentAnimation];
 }
 
 void AnimationTree::setCurrentAnimation(std::string animationName) {

@@ -1,11 +1,16 @@
 #include "./includes/GameState.hpp"
 
-
 GameState::GameState(): m_score(0), m_gameOver(false) {
+
+  this->LoadingAssets();
+
+  AssetsManager* assetManager = AssetsManager::getInstance();
+
+  m_parallax.AddBackground("middle_ground", Vector2{0, 1.2}, assetManager->getAsset("middle_ground"));
+  m_parallax.AddBackground("for_ground", Vector2{0, 1.8}, assetManager->getAsset("for_ground"));
+  m_parallax.AddBackground("back_ground", Vector2{0, 0.8}, assetManager->getAsset("back_ground"));
+
   m_spaceship = new Spaceship("ressources/ship.png");
-  Image image = LoadImage("ressources/explosion.png");
-  m_explosionTexture = LoadTextureFromImage(image);
-  UnloadImage(image);
 
   m_speed = new Timer(0.02);
   m_firingSpeed = new Timer(0.1);
@@ -27,10 +32,23 @@ GameState::GameState(): m_score(0), m_gameOver(false) {
   m_aliens = new Aliens(Vector2{50+OFFSET, 10+OFFSET});
 }
 
+void GameState::LoadingAssets() {
+  AssetsManager* assetManager = AssetsManager::getInstance();
+
+  Texture2D forGround = LoadTexture("ressources/close_stars.png"); 
+  Texture2D middleGround = LoadTexture("ressources/space.png");
+  Texture2D backGround = LoadTexture("ressources/far_stars.png");
+
+  assetManager->addAsset("for_ground", forGround);
+  assetManager->addAsset("middle_ground", middleGround);
+  assetManager->addAsset("back_ground", backGround);
+}
+
 States GameState::Update() {
   if(m_gameOver) {
     return States::GAMEOVER;
   }
+
 // Spaceship update & fire
   m_spaceship->Update();
   if(m_spaceship->isFiring()) {
@@ -47,77 +65,73 @@ States GameState::Update() {
   }
 // Aliens update
   m_aliens->Update();
-// Explosions update
-  for(auto explosion : m_explosions) {
-    explosion->Update();
-  }
 // Generate laser from random alien
   if(m_firingSpeed->eventTriggered()) {
-    Vector2 alienPosition =  m_aliens->Firing();
-    Vector2 laserPosition = Vector2{
-      alienPosition.x + OFFSET + 20,
-      alienPosition.y + OFFSET + 40
-    };
-
-    m_lasers.push_back(
-      new Laser(laserPosition, Direction::DOWN, RED)
-    );
+    this->GenerateLaser();
   }
 // Fixed update
   if(m_speed->eventTriggered()) {
-    m_spaceship->FixedUpdate();
-    m_aliens->FixedUpdate();
-
-// LASERS COLLISIONS
-    for (int i = m_lasers.size()-1; i >= 0; --i) {
-      m_lasers[i]->FixedUpdate();
-// WITH WINDOWS
-      if(m_lasers[i]->getPosition().y < OFFSET || 
-        m_lasers[i]->getPosition().y > SCREEN_HEIGHT + OFFSET
-      ) {
-        delete m_lasers[i];
-        m_lasers.erase(m_lasers.begin() + i);
-        continue;
-      }
-// WITH ALIENS
-      if(m_lasers[i]->getDirection() == UP && 
-        m_aliens->CheckCollision(m_lasers[i]->getPosition())
-      ) {
-
-        m_explosions.push_back(
-          new Explosion(
-            &m_explosionTexture, 
-            Vector2{m_lasers[i]->getPosition().x, m_lasers[i]->getPosition().y}
-          )
-        );
-
-        delete m_lasers[i];
-        m_lasers.erase(m_lasers.begin() + i);
-        continue;
-      }   
-// WITH SPACESHIP
-      if(CheckCollisionRecs(m_spaceship->getPosition(), m_lasers[i]->getPosition())) {
-        m_gameOver = true;  
-      }
-
-// WITH OBSTACLES 
-      for(auto obstacle : m_obstacles) {
-        if(obstacle->DestroyCell(m_lasers[i]->getPosition())) {
-          delete m_lasers[i];
-          m_lasers.erase(m_lasers.begin() + i);
-          break;
-        }
-      }
-    }
-  } // fixed update end
+    this->FixedUpdate();
+  }
 
   return States::CONTINUE;
 }
 
-void GameState::Draw() {
-  for(auto explosion : m_explosions) {
-    explosion->Draw();
+void GameState::FixedUpdate() {
+  m_parallax.FixedUpdate();
+
+  m_spaceship->FixedUpdate();
+  m_aliens->FixedUpdate();
+
+  for (int i = m_lasers.size()-1; i >= 0; --i) {
+    m_lasers[i]->FixedUpdate();
+
+    if(this->HandleCollision(m_lasers[i])) {
+      delete m_lasers[i];
+      m_lasers.erase(m_lasers.begin()+i);
+    }
   }
+}
+
+void GameState::GenerateLaser() {
+  Vector2 alienPosition =  m_aliens->Firing();
+  Vector2 laserPosition = Vector2{
+    alienPosition.x + OFFSET + 20,
+    alienPosition.y + OFFSET + 40
+  };
+
+  m_lasers.push_back(new Laser(laserPosition, Direction::DOWN, RED));
+}
+
+bool GameState::HandleCollision(Laser* laser) {
+// WITH WINDOWS
+  if(laser->getPosition().y < OFFSET || 
+    laser->getPosition().y > SCREEN_HEIGHT + OFFSET
+  ) {  
+    return true;
+  }
+// WITH ALIENS
+  if(laser->getDirection() == UP && 
+  m_aliens->CheckCollision(laser->getPosition())) {
+    return true;
+  }   
+// WITH SPACESHIP
+  if(CheckCollisionRecs(m_spaceship->getPosition(), laser->getPosition())) {
+    m_gameOver = true;  
+  }
+
+// WITH OBSTACLES 
+  for(auto obstacle : m_obstacles) {
+    if(obstacle->DestroyCell(laser->getPosition())) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void GameState::Draw() {
+  m_parallax.Draw();
 
   m_spaceship->Draw();
 
@@ -132,15 +146,10 @@ void GameState::Draw() {
 }
 
 GameState::~GameState(){
-  UnloadTexture(m_explosionTexture);
   delete m_spaceship;
   delete m_speed;
   delete m_aliens;
-
-  for(auto explosion : m_explosions) {
-    delete explosion;
-  }
-
+  
   for(auto obstacle : m_obstacles) {
     delete obstacle;
   }

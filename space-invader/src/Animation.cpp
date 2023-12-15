@@ -7,7 +7,10 @@ Animation::Animation(const Texture2D& texture): m_texture(&texture) {
 
 Animation::Animation(const Animation& animation): 
   m_texture(animation.m_texture), m_frames(animation.m_frames), m_timer(animation.m_timer),
-  m_color(animation.m_color) {}
+  m_color(animation.m_color) {
+    m_isLoop = animation.m_isLoop;
+    m_isPlaying = animation.m_isPlaying;
+  }
 
 void Animation::setIsLoop(bool isLoop) {
   m_isLoop = isLoop;
@@ -21,7 +24,7 @@ void Animation::setTexture(const Texture2D& texture) {
   m_texture = &texture;
 }
 
-bool Animation::getIsPlaying() {
+const bool Animation::getIsPlaying() const {
   return m_isPlaying;
 }
 
@@ -90,6 +93,9 @@ void Animation::Update() {
 }
 
 void Animation::Draw(const Rectangle destination) {
+  if(!m_isPlaying) {
+    return;
+  }
   DrawTexturePro(
     *m_texture,
     m_frames[m_currentFrame],

@@ -22,7 +22,7 @@ class Animation {
   void setInterval(float interval);
   void setTexture(const Texture2D& texture);
   // Getterss
-  bool getIsPlaying();
+  const bool getIsPlaying() const;
   const Texture2D* getTexture();
   const Rectangle getCurrentFrame();
   const int getIndex();

@@ -4,6 +4,7 @@ Aliens::Aliens(Vector2 position) {
   m_images.push_back(LoadImage("ressources/yellow_enemy.png"));
   m_images.push_back(LoadImage("ressources/green_enemy.png"));
   m_images.push_back(LoadImage("ressources/pink_enemy.png"));
+  m_images.push_back(LoadImage("ressources/explosion.png"));
 
   m_speed.x = 2;
   m_speed.y = 12;
@@ -27,7 +28,7 @@ void Aliens::Initiate(Vector2 position) {
     i < ALIENS_COLUMNS ? index = 2 : i < ALIENS_COLUMNS*3 ? index = 1 : index = 0;
 
     m_aliens.push_back(
-      new Alien(&m_textures[index], alienPosition, m_speed)
+      new Alien(&m_textures[index], &m_textures[3], alienPosition, m_speed)
     );   
   }
 }
@@ -42,8 +43,6 @@ const Vector2 Aliens::Firing() {
 bool Aliens::CheckCollision(const Rectangle laser) {
   for (int i = m_aliens.size()-1; i >= 0; --i) {
     if(m_aliens[i]->CheckCollision(laser)) {
-      delete m_aliens[i];
-      m_aliens.erase(m_aliens.begin() + i);
       return true;
     }
   }
@@ -52,8 +51,12 @@ bool Aliens::CheckCollision(const Rectangle laser) {
 }
 
 void Aliens::Update() {
-  for(auto alien : m_aliens) {
-    alien->Update();
+  for(int i(m_aliens.size()-1); i >= 0; --i) {
+    m_aliens[i]->Update();
+    if(m_aliens[i]->ShouldBeDeleted()) {
+      delete m_aliens[i];
+      m_aliens.erase(m_aliens.begin() + i);
+    }
   }
 }
 

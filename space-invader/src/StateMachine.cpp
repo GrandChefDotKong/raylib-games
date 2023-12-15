@@ -10,6 +10,7 @@
       m_newState = States::CONTINUE;
       m_currentState = new MenuState();
 
+
       while(WindowShouldClose() == false) {
 
         this->Update();

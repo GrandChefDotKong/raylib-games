@@ -14,7 +14,8 @@ class AnimationTree {
       Animation animation
     );
 
-    const std::string getCurrentAnimation();
+    const std::string getCurrentAnimationName();
+    const Animation getCurrentAnimation();
     void setCurrentAnimation(std::string animationName);
     
     virtual void Update();

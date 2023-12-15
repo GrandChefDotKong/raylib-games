@@ -6,7 +6,8 @@
 #include "Aliens.hpp"
 #include "Spaceship.hpp"
 #include "Timer.hpp"
-#include "Explosion.hpp"
+#include "AssetsManager.hpp"
+#include "Parallax.hpp"
 
 class GameState: public State {
 
@@ -17,18 +18,19 @@ private:
   Timer* m_speed;
   Timer* m_firingSpeed;
 
-  Texture2D m_explosionTexture;
-
   Spaceship* m_spaceship;
   Aliens* m_aliens;
+  Parallax m_parallax;
   std::vector<Laser*> m_lasers;
   std::vector<Obstacle*> m_obstacles;
-  std::vector<Explosion*> m_explosions;
   
 public:
-
   GameState();
   virtual States Update();
+  virtual void FixedUpdate();
+  bool HandleCollision(Laser* laser);
+  void GenerateLaser();
+  void LoadingAssets();
   virtual void Draw();
   virtual ~GameState();
 };
