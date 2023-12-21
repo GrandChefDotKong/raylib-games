@@ -113,6 +113,7 @@ bool GameState::HandleCollision(Laser* laser) {
 // WITH ALIENS
   if(laser->getDirection() == UP && 
   m_aliens->CheckCollision(laser->getPosition())) {
+    m_score += 10;
     return true;
   }   
 // WITH SPACESHIP
@@ -132,7 +133,6 @@ bool GameState::HandleCollision(Laser* laser) {
 
 void GameState::Draw() {
   m_parallax.Draw();
-
   m_spaceship->Draw();
 
   for(auto obstacle : m_obstacles) {
@@ -143,12 +143,15 @@ void GameState::Draw() {
   for(auto laser : m_lasers) {
     laser->Draw();
   }
+  
+  DrawText(TextFormat("Score : %i", m_score), OFFSET+10, OFFSET+10, 20, WHITE);
 }
 
 GameState::~GameState(){
   delete m_spaceship;
-  delete m_speed;
   delete m_aliens;
+  delete m_firingSpeed;
+  delete m_speed;
   
   for(auto obstacle : m_obstacles) {
     delete obstacle;

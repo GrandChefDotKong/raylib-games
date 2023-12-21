@@ -44,12 +44,14 @@
     void StateMachine::Draw() {
       BeginDrawing();
       ClearBackground(Dark_Green);
+      m_currentState->Draw();
       
+      DrawRectangle(OFFSET, 0, SCREEN_WIDTH, OFFSET, Dark_Green);
+      DrawRectangle(OFFSET, SCREEN_HEIGHT+OFFSET, SCREEN_WIDTH, OFFSET, Dark_Green);
+
       DrawRectangleLinesEx(
         Rectangle{OFFSET-5, OFFSET-5, SCREEN_WIDTH+10, SCREEN_HEIGHT+10}, 2, Light_Green
       );
-
-      m_currentState->Draw();
       EndDrawing();
     }
 

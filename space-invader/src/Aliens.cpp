@@ -51,6 +51,13 @@ bool Aliens::CheckCollision(const Rectangle laser) {
 }
 
 void Aliens::Update() {
+
+  if(m_aliens.size() == 0) {
+    m_speed.x += 2;
+    this->Initiate(Vector2{50+OFFSET, 10+OFFSET});
+    return;
+  }
+
   for(int i(m_aliens.size()-1); i >= 0; --i) {
     m_aliens[i]->Update();
     if(m_aliens[i]->ShouldBeDeleted()) {
@@ -62,6 +69,10 @@ void Aliens::Update() {
 
 void Aliens::FixedUpdate() {
   
+  if(m_aliens.size() == 0) {
+    return;
+  }
+
   for(auto alien : m_aliens) {
     alien->FixedUpdate();
   }
